@@ -1,0 +1,46 @@
+SET SCHEMA FN45309;
+
+--Triger 1
+CREATE TRIGGER default_category_update
+    before update of CATEGORY_ID on PRODUCTS
+    referencing old as O new as N
+    for each row when( N.CATEGORY_ID not in (select ID FROM CATEGORY))
+    SET N.CATEGORY_ID = (SELECT ID FROM CATEGORY WHERE CATEGORY.CATEGORY_TYPE = 'Other');
+
+UPDATE PRODUCTS
+SET CATEGORY_ID = 23
+WHERE NAME = 'ASUS X509MA-WBPO1T';
+
+
+--Triger 2
+CREATE TRIGGER TRIG_PRICE
+BEFORE UPDATE OF PRICE ON PRODUCTS
+REFERENCING NEW AS N OLD AS O
+FOR EACH ROW
+WHEN ( N.PRICE <= 0 ) SET N.PRICE = O.PRICE;
+
+UPDATE PRODUCTS
+SET PRICE = -20
+WHERE NAME = 'ESPERANZA ILLUMINATED';
+
+
+--Triger 3
+create TRIGGER default_category_create
+    before insert on PRODUCTS
+    referencing new as N
+    for each row when( N.CATEGORY_ID not in (select ID FROM CATEGORY))
+    SET N.CATEGORY_ID = (SELECT ID FROM CATEGORY WHERE CATEGORY.CATEGORY_TYPE = 'Other');
+
+INSERT INTO FN45309.PRODUCTS(NAME, PRICE, QUANTITY_IN_STOCK, MANUFACTURER, CATEGORY_ID)
+VALUES ('ACER 10T15H', '2375', 40, 'China', 20);
+
+
+--Triger 4
+CREATE TRIGGER default_order_status
+    before insert on ORDERS
+    referencing new as N
+    for each row
+      set N.STATUS = 'IN PROCESS', N.ORDER_DATE = CURRENT_DATE;
+
+INSERT INTO FN45309.ORDERS (TOTAL_PRICE, SHIPPING_ADDRESS, CUSTOMER_ID)
+VALUES (18, 'Sofia-Nadejda', 1);
